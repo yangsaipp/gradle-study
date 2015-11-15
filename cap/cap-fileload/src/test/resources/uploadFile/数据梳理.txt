@@ -1,0 +1,33 @@
+cip-codegen-0.0.1
+	删除
+	src\main\resources\com\comtop\cip\codegen\test
+	排除
+	src\test
+	移动
+	src\main\resources\codegen.properties
+	src\main\resources\log4j.properties
+	
+	? 建议不开放
+	src\main\resources\com\comtop\cip\codegen\inte  模板存放目录
+	src\main\resources\com\comtop\cip\codegen\maven
+	src\main\resources\com\comtop\cip\codegen\template
+	
+cip-metadata-0.0.1
+	src\test
+		
+cip-metadata-0.0.1
+	？
+	src\main\resources\com\comtop\cip\metadata\uiconfig
+	
+cip-webapp-0.0.1
+	删除
+	src/main/java/com/comtop/lzyt/project
+	src\main\webapp\lzyt\project
+	排除(eic测试文件)：
+	src\main\webapp\WEB-INF\eic\config\excelexport
+	src\main\webapp\WEB-INF\eic\config\excelimport
+	src\main\webapp\WEB-INF\eic\config\wordexport
+	src\main\webapp\WEB-INF\eic\model
+	
+	,'args':'+-entityAttriArray[i].id-+'
+	

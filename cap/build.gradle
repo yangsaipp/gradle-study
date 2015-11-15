@@ -1,0 +1,40 @@
+//公用配置,所有子项目共享
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'eclipse-wtp'	//所有子项目都必须要使用eclipse-wtp插件，不然导入到eclipse中各项目无法互相依赖
+	
+	sourceCompatibility = 1.6
+    version = '1.0'
+
+    repositories {
+       mavenCentral()
+    }
+
+    dependencies {
+        testCompile 'junit:junit:4.12'
+    }
+
+    jar {
+        manifest {
+        	attributes 	'provider': 'gradle',
+						'Implementation-Title': 'Gradle Quickstart',
+						'Implementation-Version': version
+        }
+        
+    }
+    
+    //解决由于java文件中文乱码无法编译通过的问题
+    tasks.withType(JavaCompile) { 
+    	options.encoding = "UTF-8" 
+    }
+    
+    //配置jar发布的仓库地址
+    uploadArchives {
+    	repositories {
+       		flatDir {
+           		dirs 'repos'	//本地仓库
+       		}
+    	}
+	}
+    
+}

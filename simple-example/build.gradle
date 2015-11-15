@@ -1,0 +1,70 @@
+defaultTasks 'dTask0','hello'   //不指定任何task时执行的task
+
+//注意dependsOn的task名是字符串（由于所依赖的task定义在本方法的后面而非之前）
+task count(dependsOn: 'hello') << {
+    4.times {print "$it" }
+}
+
+//hello task
+task hello << {
+	println 'hello'
+}
+
+//注意该task没有<<，目前来看不管执行那个task 该task每次都会执行，感觉可能是配置
+task myTask {
+    println 'myTask execute.'
+    ext.myName = "gradle"
+}
+
+//为方法增加多余的执行动作
+hello.doFirst {
+    println "before $hello.name task."
+}
+
+hello.doLast {
+    println "after $hello.name task."
+}
+
+//注意该hello放的位子不同执行的顺序不同，在dolast之前那么会先于dolast之前执行
+hello << {
+    print 'hello again.'
+    print " $myTask.myName"
+}
+
+//动态定义task
+4.times  { index ->
+    task "dTask$index" << {
+        println "i am in task$index"
+        //单引号里面是字符串，若想在字符串里面加入变量请使用双引号
+        //println "i am in task$index" 和 println 'i am in task$index' 输出结果不一样，前者的$index会替换对应的属性值，后者不会
+    }
+}
+
+dTask3.dependsOn dTask0,dTask1
+
+//根据执行的不同任务设置不同变量
+task distribution << {
+    println "We build the zip with version=$version"
+}
+
+task release(dependsOn: 'distribution') << {
+    println 'We release now'
+}
+
+//taskGraph应该是即将要执行的任务列表，通过判断要执行的任务列表里面是否有release来给version不同的值
+gradle.taskGraph.whenReady {taskGraph ->
+    println "i am in taskGraph whenReady"
+    // println taskGraph
+    if(taskGraph.hasTask(release)) {
+        version = '1.0'
+    }else {
+        version = '1.0-SNAPSHOT'
+    }
+}
+
+task printProject << {
+    println project.dependencies
+    println project.configurations
+    println project.buildFile
+    println project.artifacts
+}

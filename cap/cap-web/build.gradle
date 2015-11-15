@@ -1,0 +1,35 @@
+apply plugin: 'war'
+
+dependencies {
+	compile project(':cap-action')
+    compile group: 'commons-io', name: 'commons-io', version: '1.4'
+    compile group: 'log4j', name: 'log4j', version: '1.2.15', ext: 'jar'
+    providedCompile "javax.servlet:servlet-api:2.5"
+}
+
+eclipse {
+  wtp {
+    component {
+      //for examples see docs for EclipseWtpComponent
+      contextPath = "capWeb-contextPath"
+      deployName = 'capWeb-deployName'
+      //libConfigurations = [project(':cap-action').configurations.runtime,project(':cap-fileload').configurations.runtime]
+    }
+
+    facet {
+      //for examples see docs for EclipseWtpFacet
+    }
+  }
+}
+
+task sysout << {
+    println webAppDirName
+}
+
+task listJars << {
+	println '编译环境的jar列表：'
+    configurations.compile.each { File file -> println file.name }
+    
+    println '测试编译环境的jar列表：'
+    configurations.testCompile.each { File file -> println file.name }
+}
