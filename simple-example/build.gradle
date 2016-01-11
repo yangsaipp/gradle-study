@@ -68,3 +68,13 @@ task printProject << {
     println project.buildFile
     println project.artifacts
 }
+
+task ptFile << {
+    println project.projectDir
+    File readme = new File("$project.projectDir/README.md")
+    def contextList = [];
+    readme.eachLine("UTF-8"){ contextList.push(it) }
+    contextList.each {
+	println it
+    }
+}
