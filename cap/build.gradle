@@ -36,5 +36,27 @@ subprojects {
        		}
     	}
 	}
-    
+}
+
+//生成补丁（增量）文件，目前是需要将增量文件名列表拷贝到hotFix.txt中，后面考虑自己读取svn或git的提交记录
+task generateHotFix << {
+    println project.projectDir
+    File readme = new File("$project.projectDir/hotFix.txt")
+    def contextList = [];
+    readme.eachLine("UTF-8"){ contextList.push(it) }
+    contextList.each {
+		println it
+    }    
+}
+
+task copyHotFix(type:Copy) {
+	childProjects.each {key, value ->
+		from "$value.projectDir/bin"
+		into "$project.buildDir/hotFix"
+		//include '**/*.class'
+		include {details ->
+			println details.file.name
+			details.file.name.endsWith('.class')
+		}
+	}
 }
