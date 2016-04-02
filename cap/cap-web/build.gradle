@@ -8,22 +8,48 @@ dependencies {
 }
 
 eclipse {
-  wtp {
-    component {
-      //for examples see docs for EclipseWtpComponent
-      contextPath = "capWeb-contextPath"
-      deployName = 'capWeb-deployName'
-      //libConfigurations = [project(':cap-action').configurations.runtime,project(':cap-fileload').configurations.runtime]
-    }
+  	wtp {
+	    component {
+	      //for examples see docs for EclipseWtpComponent
+	      contextPath = "capWeb-contextPath"
+	      deployName = 'capWeb-deployName'
+	      //libConfigurations = [project(':cap-action').configurations.runtime,project(':cap-fileload').configurations.runtime]
+	    }
 
-    facet {
-      //for examples see docs for EclipseWtpFacet
-    }
-  }
+	    facet {
+	      //for examples see docs for EclipseWtpFacet
+	    }
+  	}
+	project {
+		//linkedResource name: 'fileload-java', type: '2', location: project(':cap-fileload').projectDir.path + '/src/main/java'
+	}
+
+  	classpath {
+    	//defaultOutputDir = file("$webAppDirName/WEB-INF/classes")
+    	file {
+  			//if you want to mess with the resulting XML in whatever way you fancy
+	  		withXml {
+	    		def node = it.asNode()
+	    		//kind="src" path="fileload-java"
+	    		//node.appendNode('classpathentry', [kind: 'src', path: 'fileload-java'])
+	    		
+	  		}
+  		}
+	}
+	
+}
+
+task copyAllDependencies(type: Copy) {
+	//referring to the 'compile' configuration
+	from configurations.compile
+	into "$webAppDirName/WEB-INF/lib"
 }
 
 task sysout << {
-    println webAppDirName
+	println sourceSets.class
+	//println projectDir
+    //println webAppDir
+    //println webAppDirName
 }
 
 task listJars << {

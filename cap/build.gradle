@@ -1,12 +1,22 @@
 //公用配置,所有子项目共享
 subprojects {
     apply plugin: 'java'
+    apply plugin: 'eclipse'
     apply plugin: 'eclipse-wtp'	//所有子项目都必须要使用eclipse-wtp插件，不然导入到eclipse中各项目无法互相依赖
     apply plugin: 'maven'	//maven插件
 	
 	sourceCompatibility = 1.7
 	group = 'com.yangsai'
     version = '2.0'
+
+	//compileJava {
+	    //enable compilation in a separate daemon process
+	    //options.fork = true
+	
+	    //enable incremental compilation
+	    //options.incremental = true
+	//}
+	
 	
     repositories {
        mavenLocal()
@@ -44,6 +54,16 @@ subprojects {
 	        	repository(url: "file://localhost/tmp/myRepo/")
 	        }
     	}
+	}
+	
+	eclipse {
+		project {
+			//linkedResource name: 'bin', type: '2', location: project(':cap-web').projectDir.path + '/src/main/webapp/WEB-INF/classes'
+		}
+		
+		classpath {
+	    	//defaultOutputDir = file('build-eclipse-file')
+		}
 	}
 }
 
