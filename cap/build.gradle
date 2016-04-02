@@ -2,11 +2,14 @@
 subprojects {
     apply plugin: 'java'
     apply plugin: 'eclipse-wtp'	//所有子项目都必须要使用eclipse-wtp插件，不然导入到eclipse中各项目无法互相依赖
+    apply plugin: 'maven'	//maven插件
 	
-	sourceCompatibility = 1.6
-    version = '1.0'
-
+	sourceCompatibility = 1.7
+	group = 'com.yangsai'
+    version = '2.0'
+	
     repositories {
+       mavenLocal()
        mavenCentral()
     }
 
@@ -16,9 +19,12 @@ subprojects {
 
     jar {
         manifest {
-        	attributes 	'provider': 'gradle',
-						'Implementation-Title': 'Gradle Quickstart',
-						'Implementation-Version': version
+        	//jar文件里的MANIFEST.MF文件信息配置
+        	attributes 	'Provider': 'gradle',
+						'Implementation-Title': project.name,
+						'Implementation-Version': version,
+						'Main-Class': ''
+						
         }
         
     }
@@ -34,6 +40,9 @@ subprojects {
        		flatDir {
            		dirs 'repos'	//本地仓库
        		}
+       		mavenDeployer {
+	        	repository(url: "file://localhost/tmp/myRepo/")
+	        }
     	}
 	}
 }
