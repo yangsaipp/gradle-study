@@ -7,6 +7,10 @@ dependencies {
     providedCompile "javax.servlet:servlet-api:2.5"
 }
 
+ext{
+	//linkConfig = true
+}
+
 eclipse {
   	wtp {
 	    component {
@@ -22,21 +26,61 @@ eclipse {
   	}
 	project {
 		//linkedResource name: 'fileload-java', type: '2', location: project(':cap-fileload').projectDir.path + '/src/main/java'
+		
+		file {
+		
+			//closure executed after .classpath content is loaded from existing file
+		  	//and after gradle build information is merged
+		  	whenMerged { eProject ->
+		  		//根据要配置的资源链接的信息[链接名,链接类型,链接的目录,链接的url]，构建Link对象并加入eclipse.project(领域配置对象)中去
+		  		//对应 eclipse中工程属性中的 resource->link resources里面的配置
+		  		if(eclipse.hasProperty("requireLinks")) {
+					eclipse.ext.requireLinks.each{
+						eProject.linkedResources << new org.gradle.plugins.ide.eclipse.model.Link(it.name, it.type, it.location, it.locationUri)
+					}		  		
+		  		}
+		  	}
+		}
 	}
-
+	
   	classpath {
-    	//defaultOutputDir = file("$webAppDirName/WEB-INF/classes")
-    	file {
-  			//if you want to mess with the resulting XML in whatever way you fancy
-	  		withXml {
-	    		def node = it.asNode()
-	    		//kind="src" path="fileload-java"
-	    		//node.appendNode('classpathentry', [kind: 'src', path: 'fileload-java'])
-	    		
+  		//若配置linkConfig为true则生成eclipse相关link的配置
+  		if(project.hasProperty("linkConfig") && project.ext.linkConfig) {
+  			//set eclipse source default output dir
+    		defaultOutputDir = file("$webAppDirName/WEB-INF/classes")
+    		
+    		file {
+  				//if you want to mess with the resulting XML in whatever way you fancy
+  				//定制化生成的.classpath文件内容
+	  			withXml {
+	  				def node = it.asNode()
+		    		/*
+		    		* 用于存放需要配置的资源链接，对应 eclipse中工程属性中的 resource->link resources里面的配置
+		    		* 注意点：
+		    		*	1、requireLinks需要在classpath这里创建和加入信息，在上面project里面在去访问，这是由于eclipse插件执行顺序导致的，eclipse执行顺序如下
+		    		*	:cap-web:eclipseClasspath
+					*	:cap-web:eclipseJdt
+					*	:cap-web:eclipseProject
+		    		*	2、这里不能使用project.ext.requireLinks，若使用的话在上面project会获取不到，原因暂时不知道，可能是由于闭包导致的。
+		    		*/
+		    		eclipse.ext.requireLinks = []
+		    		rootProject.subprojects.findAll{it.name !='cap-web'}.each{
+		    			//增加<classpathentry kind="src" path="cap-fileload"/>这样节点配置，对应 eclipse中工程属性中的 java build path里面的source的配置
+						node.appendNode('classpathentry', [kind: 'src', path: it.name+'-java'])
+						node.appendNode('classpathentry', [kind: 'src', path: it.name+'-resource'])
+						
+						it.sourceSets.main.java.srcDirs.each { srcDir ->
+							//加入要配置的资源链接的信息[链接名,链接类型,链接的目录,链接的url]，对应 eclipse中工程属性中的 resource->link resources里面的配置
+							eclipse.ext.requireLinks << [name:"$it.name-java", type:'2', location:srcDir.path, locationUri: null]
+						}
+						it.sourceSets.main.resources.srcDirs.each { srcDir ->
+							eclipse.ext.requireLinks << [name:"$it.name-resource", type:'2', location:srcDir.path, locationUri: null]
+						}
+					}
+	  			}
 	  		}
   		}
 	}
-	
 }
 
 task copyAllDependencies(type: Copy) {
@@ -46,10 +90,23 @@ task copyAllDependencies(type: Copy) {
 }
 
 task sysout << {
-	println sourceSets.class
+	rootProject.subprojects.findAll()
 	//println projectDir
     //println webAppDir
     //println webAppDirName
+}
+
+//过滤项目并输出对应的源目录
+task filterProject << {
+	rootProject.subprojects.findAll{it.name !='cap-web'}.each{
+		println "$it:"
+		it.sourceSets.main.java.srcDirs.each { dir ->
+			println " -java dir:$dir"
+		}
+		it.sourceSets.main.resources.srcDirs.each { dir ->
+			println " -resource dir:$dir"
+		}
+	}
 }
 
 task listJars << {
