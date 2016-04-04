@@ -26,7 +26,6 @@ eclipse {
   	}
 	project {
 		//linkedResource name: 'fileload-java', type: '2', location: project(':cap-fileload').projectDir.path + '/src/main/java'
-		
 		file {
 		
 			//closure executed after .classpath content is loaded from existing file
@@ -99,11 +98,102 @@ task copyAllDependencies(type: Copy) {
 	into "$webAppDirName/WEB-INF/lib"
 }
 
+//> gradle -q pingServer1
+//Pinging: Server1
+tasks.addRule("Pattern: ping<ID>") { String taskName ->
+    if (taskName.startsWith("ping")) {
+        task(taskName) << {
+            println "Pinging: " + (taskName - 'ping')
+        }
+    }
+}
+
+//生成补丁（增量）文件，目前是需要将增量文件名列表拷贝到hotFix.txt中，后面考虑自己读取svn或git的提交记录
+task generateHotFix(dependsOn:'copyClassHotFix') << {
+	println 'generateHotFix'
+}
+
+//构建hotFix的配置信息
+task createHotFixConfig(dependsOn: 'compileJava') << {
+	File readme = new File("$rootProject.projectDir/hotFix.txt")
+    copyClassHotFix.ext.hotFixFiles = []
+    copyWebHotFix.ext.hotFixFiles = []
+    //copyClassHotFix.ext.hotFixFiles = ['org/gradle/sample/Greeter.class','gradleCopy.xml']
+	//copyWebHotFix.ext.hotFixFiles = ['WEB-INF/web.xml','index.jsp']
+    readme.eachLine("UTF-8"){
+    	it = it.replaceAll("\\\\", '/');
+    	def javaFlag = '/src/main/java/'
+    	def resourceFlag = '/src/main/resources/'
+    	def webAppFlag = '/src/main/webapp/'
+    	def index = it.indexOf(javaFlag)
+    	if(index != -1) {
+    		it = it.replaceAll('java$', 'class')
+    		copyClassHotFix.ext.hotFixFiles << it.substring(index+javaFlag.length(), it.length())
+    		//注意不能使用continue
+    		return false
+    	}
+    	index = it.indexOf(resourceFlag)
+    	if(index != -1) {
+    		copyClassHotFix.ext.hotFixFiles << it.substring(index+resourceFlag.length(), it.length())
+    		return false
+    	}
+    	index = it.indexOf(webAppFlag)
+    	if(index != -1) {
+    		copyWebHotFix.ext.hotFixFiles << it.substring(index+webAppFlag.length(), it.length())
+    		return false
+    	}
+    	println "$index:$it"
+    }
+    //println copyClassHotFix.ext.hotFixFiles
+    //println copyWebHotFix.ext.hotFixFiles
+	
+	//设置补丁（增量）生成的文件夹目录
+	generateHotFix.ext.outDir = 'hotFix/'+ new Date().format('yyyy-MM-dd_HHmm')
+	//先清理
+	delete(generateHotFix.ext.outDir)
+	//call task copyWebHotFix
+	//tasks.copyWebHotFix.execute()
+	//call task copyClassHotFix
+	//tasks.copyClassHotFix.execute()
+}
+
+//注意：task 后面一定要有<<，不加<<的任务每次都是默认执行且是最先执行，<<应该是把任务加入到project的tasks中
+//copy编译的class补丁（增量），包含resource目录下文件，对应项目src/main/java和src/main/resources
+task copyClassHotFix(dependsOn: 'copyWebHotFix') << {
+	println ext.hotFixFiles
+	//hasProperty
+	copy {
+		//class 目录
+		from sourceSets.main.output.classesDir		
+		//resource 目录
+		from sourceSets.main.output.resourcesDir
+		into "$generateHotFix.ext.outDir/WEB-INF/classes"
+		include ext.hotFixFiles
+	}
+}
+
+//copy编译的webapp补丁（增量），对应项目src/main/webapp
+task copyWebHotFix(dependsOn:'createHotFixConfig') << {
+	println ext.hotFixFiles
+	copy {
+		//webApp目录
+		from webAppDirName, {	
+			exclude '**/classes'
+			exclude '**/lib'
+		}
+		into generateHotFix.ext.outDir
+		include ext.hotFixFiles
+	}
+}
+
 task sysout << {
-	rootProject.subprojects.findAll()
-	//println projectDir
-    //println webAppDir
-    //println webAppDirName
+	println new Date().format('yyyy-MM-dd HH:mm:ss')
+	//println "$project.buildDir/hotFix"
+    //println project.sourceSets.main.output.resourcesDir
+	//println project.sourceSets.main.output.classesDir	
+	//println projectDir	//op:E:\Workspaces\workspace_java\gradle-study\cap\cap-web
+    //println webAppDir		//op:E:\Workspaces\workspace_java\gradle-study\cap\cap-web\src\main\webapp
+    //println webAppDirName	//op:src/main/webapp
 }
 
 //过滤项目并输出对应的源目录
