@@ -161,28 +161,33 @@ task createHotFixConfig(dependsOn: 'compileJava') << {
 //copy编译的class补丁（增量），包含resource目录下文件，对应项目src/main/java和src/main/resources
 task copyClassHotFix(dependsOn: 'copyWebHotFix') << {
 	println ext.hotFixFiles
+	println "classFile:$ext.hotFixFiles"
 	//hasProperty
-	copy {
-		//class 目录
-		from sourceSets.main.output.classesDir		
-		//resource 目录
-		from sourceSets.main.output.resourcesDir
-		into "$generateHotFix.ext.outDir/WEB-INF/classes"
-		include ext.hotFixFiles
+	if(!ext.hotFixFiles.empty) {
+		copy {
+			//class 目录
+			from sourceSets.main.output.classesDir
+			//resource 目录
+			from sourceSets.main.output.resourcesDir
+			into "$generateHotFix.ext.outDir/WEB-INF/classes"
+			include ext.hotFixFiles
+		}
 	}
 }
 
 //copy编译的webapp补丁（增量），对应项目src/main/webapp
 task copyWebHotFix(dependsOn:'createHotFixConfig') << {
-	println ext.hotFixFiles
-	copy {
-		//webApp目录
-		from webAppDirName, {	
-			exclude '**/classes'
-			exclude '**/lib'
+	println "webFile:$ext.hotFixFiles"
+	if(!ext.hotFixFiles.empty) {
+		copy {
+			//webApp目录
+			from webAppDirName, {	
+				exclude '**/classes'
+				//exclude '**/lib'
+			}
+			into generateHotFix.ext.outDir
+			include ext.hotFixFiles
 		}
-		into generateHotFix.ext.outDir
-		include ext.hotFixFiles
 	}
 }
 
