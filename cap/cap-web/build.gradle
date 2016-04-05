@@ -114,7 +114,7 @@ task generateHotFix(dependsOn:'copyClassHotFix') << {
 }
 
 //构建hotFix的配置信息
-task createHotFixConfig(dependsOn: 'compileJava') << {
+task createHotFixConfig(dependsOn: 'jar') << {
 	File readme = new File("$rootProject.projectDir/hotFix.txt")
     copyClassHotFix.ext.hotFixFiles = []
     copyWebHotFix.ext.hotFixFiles = []
@@ -160,7 +160,6 @@ task createHotFixConfig(dependsOn: 'compileJava') << {
 //注意：task 后面一定要有<<，不加<<的任务每次都是默认执行且是最先执行，<<应该是把任务加入到project的tasks中
 //copy编译的class补丁（增量），包含resource目录下文件，对应项目src/main/java和src/main/resources
 task copyClassHotFix(dependsOn: 'copyWebHotFix') << {
-	println ext.hotFixFiles
 	println "classFile:$ext.hotFixFiles"
 	//hasProperty
 	if(!ext.hotFixFiles.empty) {
