@@ -1,10 +1,16 @@
 apply plugin: 'war'
+//apply plugin: 'hotFix'
 
 dependencies {
-	compile project(':cap-action')
+	compile project(':g-action')
     compile group: 'commons-io', name: 'commons-io', version: '1.4'
     compile group: 'log4j', name: 'log4j', version: '1.2.15', ext: 'jar'
     providedCompile "javax.servlet:servlet-api:2.5"
+}
+
+hotFix {
+	message = 'say:hotFix'
+	greeter = 'web'
 }
 
 ext{
@@ -213,10 +219,23 @@ task filterProject << {
 	}
 }
 
+task copyTask << {
+	def list = []
+	list << '/src/main/resources/greeting.txt'
+	list << '/src/main/resources/gradleCopy.xml'
+	copy {
+		from list
+		into 'hotFix'
+	}
+}
+
 task listJars << {
 	println '编译环境的jar列表：'
     configurations.compile.each { File file -> println file.name }
     
     println '测试编译环境的jar列表：'
     configurations.testCompile.each { File file -> println file.name }
+
+	println 'classpath的jar列表：'
+//    prinlnt configurations
 }

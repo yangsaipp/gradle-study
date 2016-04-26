@@ -11,6 +11,7 @@ public class Test {
         try {
             return IOUtils.toString(greetingStr).trim();
         }
+        //石身上
         finally {
             greetingStr.close();
         }

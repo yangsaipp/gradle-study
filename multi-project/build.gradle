@@ -4,6 +4,7 @@ subprojects {
     apply plugin: 'eclipse'
     apply plugin: 'eclipse-wtp'	//所有子项目都必须要使用eclipse-wtp插件，不然导入到eclipse中各项目无法互相依赖
     apply plugin: 'maven'	//maven插件
+	apply plugin: 'hotFix'
 	
 	sourceCompatibility = 1.7
 	group = 'com.yangsai'
