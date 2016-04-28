@@ -3,3 +3,56 @@ dependencies {
     compile 'commons-fileupload:commons-fileupload:1.3.1'
     compile 'org.apache.commons:commons-lang3:3.3.2'
 }
+
+task b << {
+	println testName
+	println b.testConfigName
+}
+
+task a << {
+	//直接指定
+	b.ext.testName = 'testb'
+	//通过config指定属性
+	configure(b) { taskb -> 
+		taskb.ext.testConfigName = 'testBConfigName' 
+	}
+	//println a.testName
+}
+
+b.dependsOn a
+
+task c << {
+	println c.testName
+	println c.testConfigName
+}
+
+task distEarZip(type:Zip){
+	println 'distEarZip'
+	c.ext.testName = 'testdistEarZip'
+	c.ext.testConfigName = 'testdistEarZip'
+	dependsOn 'c'
+}
+
+task match << {
+	def testA = ['comtop-top-corm-3.1.2.jar','comtop-top-core-5.0.jar', 'comtop-top-common-5.0.jar']
+	testA.each {
+		def m = it=~/comtop-top-(?!corm)([\w-]+)(?:-\S+)*\.jar/
+		if(m.matches()) {
+			println m[0]
+			println m.group(1)
+		}else {
+			println 'no matches'
+		}
+		
+	}
+}
+
+task match2 << {
+	def m = 'comtop-top-dwr-3_20150105-5.0'=~/comtop-top-(?!corm)([\w-]+)(?:-\S+)*\.jar/
+	if(m.matches()) {
+		println m[0]
+		println m.group(1)
+	}else {
+		println 'no matches'
+	}
+}
