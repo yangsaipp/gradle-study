@@ -3,3 +3,24 @@ dependencies {
     //compile group: 'commons-collections', name: 'commons-collections', version: '3.2'
     testCompile group: 'junit', name: 'junit', version: '4.+'
 }
+
+//hotFix {
+//	output = 'hotFix/'+ new Date().format('yyyy-MM-dd_HHmm')
+//	svn {
+//		url = 'svnUrl'
+//		username = 'yangsai'
+//		password = 'test'
+//	}
+//	java { 
+//		source = 'build/classes'
+//		exclude '**/test.java' 
+//	}
+//	resource {
+//		source = 'build/classes'
+//		exclude = '**/test.xml'
+//	}
+//	webapp {
+//		source = 'web/app'
+//		exclude = '**/test.jsp'
+//	}
+//}

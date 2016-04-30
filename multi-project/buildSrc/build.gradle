@@ -1,5 +1,10 @@
 apply plugin: 'groovy'
 
+repositories {
+	mavenLocal()
+//	maven { url 'https://repo.gradle.org/gradle/libs' }
+}
+
 dependencies {
     compile gradleApi()
     compile localGroovy()

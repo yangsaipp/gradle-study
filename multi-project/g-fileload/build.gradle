@@ -27,7 +27,7 @@ task c << {
 }
 
 task distEarZip(type:Zip){
-	println 'distEarZip'
+//	println 'distEarZip'
 	c.ext.testName = 'testdistEarZip'
 	c.ext.testConfigName = 'testdistEarZip'
 	dependsOn 'c'
