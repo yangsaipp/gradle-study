@@ -14,12 +14,12 @@ class HotFixComponent {
 	/**
 	 * 排除文件
 	 */
-	String exclude
+	Set<String> excludes = []
 	
 	/**
 	 * 包含文件
 	 */
-	String include
+	Set<String> includes = []
 	
 	/**
 	 * hotfix输出目录
@@ -28,10 +28,18 @@ class HotFixComponent {
 	
 	@Override
 	String toString() {
-		return "source：${source};exclude：${exclude};include：${include};output：${output}"
+		return "source：${source};exclude：${excludes};include：${includes};output：${output}"
 	}
 	
 	void exclude(String exclude) {
-		this.exclude = exclude
+		if(exclude.indexOf(',')) {
+			exclude.split(',').each {
+				if(it) {
+					this.excludes << it.trim()
+				}
+			}
+		}else{
+			this.excludes << exclude.trim()
+		}
 	}
 }

@@ -17,15 +17,17 @@ hotFix {
 	}
 	java { 
 		source = 'build/classes/main'
-		exclude '**/test.java' 
+		exclude '**/test3.java'
+		exclude '**/test2.java,**/test3.java' 
 	}
 	resource {
 		source = 'build/resources/main'
-		exclude = '**/gradleCopy.xml'
+		exclude '**/gradleCopy.xml'
+		exclude '**/greeting.txt'
 	}
 	webapp {
 		source = 'src/main/webapp'
-		exclude = '**/index.jsp'
+		exclude '**/index.jsp'
 	}
 }
 

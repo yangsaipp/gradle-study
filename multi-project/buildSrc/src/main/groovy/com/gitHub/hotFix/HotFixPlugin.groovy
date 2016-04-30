@@ -26,7 +26,10 @@ class HotFixPlugin implements Plugin<Project> {
 		configureCopyClassHotFix(project, model).dependsOn(readHotFix, 'jar')
 		configureCopyWebappHotFix(project, model).dependsOn(readHotFix)
 		
-		Task task = project.task('hotFixDump') << {
+		project.task('hotFixDump') << {
+			println model.dumps()
+		}
+		Task task = project.task('createHotFix') << {
 			println model.dumps()
 		}
 		task.dependsOn('copyClassHotFix','copyWebappHotFix')
@@ -44,13 +47,15 @@ class HotFixPlugin implements Plugin<Project> {
 			if(!ext.hotFixFiles.empty) {
 				project.copy {
 					//class 目录
-					from model.java.source
+					from model.java.source, {
+						exclude model.java.excludes
+					}
 					//resource 目录
-					from model.resource.source
+					from model.resource.source, {
+						exclude model.resource.excludes
+					}
 					into "${model.output}/WEB-INF/classes"
 					include ext.hotFixFiles
-					exclude model.java.exclude
-					exclude model.resource.exclude
 				}
 			}
 		}
@@ -68,10 +73,10 @@ class HotFixPlugin implements Plugin<Project> {
 					from model.webapp.source, {
 						exclude '**/classes'
 						//exclude '**/lib'
+						exclude model.webapp.excludes
 					}
 					into model.output
 					include ext.hotFixFiles
-					exclude model.webapp.exclude
 				}
 			}
 		}
