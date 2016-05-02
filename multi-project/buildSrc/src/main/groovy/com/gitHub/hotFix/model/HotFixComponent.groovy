@@ -15,14 +15,14 @@ class HotFixComponent {
 	String source
 	
 	/**
-	 * 编译输出目录
+	 * 处理后目录,例如java编译输出目录、配置文件处理存放目录
 	 */
-	String compileSource
+	String processSource
 	
 	/**
-	 * 类型
+	 * 类型，主要在process阶段使用，目前可配置值为：java、resource、webapp
 	 */
-	String compileType
+	String processType
 	/**
 	 * 排除文件
 	 */
@@ -76,7 +76,7 @@ class HotFixComponent {
 	
 	@Override
 	String toString() {
-		return "[name:${name},source：${source},output：${output},compileSource:${compileSource},compileType:${compileType},\n excludes：${excludes};includes：${includes}]"
+		return "[name:${name},source：${source},output：${output},processSource:${processSource},processType:${processType},\n excludes：${excludes};includes：${includes}]"
 	}
 	
 	String dump() {

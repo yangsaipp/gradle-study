@@ -23,7 +23,7 @@ class HotFixGenerator extends DefaultTask {
 				buildLogger.quiet('generate hotfix {}', component.name)
 				buildLogger.quiet(component.dump())
 				project.copy {
-					from component.compileSource ? component.compileSource: component.source, {
+					from component.processSource ? component.processSource: component.source, {
 						exclude component.excludes
 					}
 					into component.output

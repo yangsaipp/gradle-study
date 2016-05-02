@@ -18,19 +18,17 @@ hotFix {
 	java { 
 		source = 'src/main/java'
 //		exclude '**/test3.java'
-		compileType = 'java'
+		processType = 'java'
 		//exclude '**/test2.java,**/test3.java'
 	}
 	resource {
 		source = 'src/main/resources'
 //		exclude '**/gradleCopy.xml'
 		exclude '**/greeting.txt'
-		compileType = 'resource'
 	}
 	webapp {
 		source = 'src/main/webapp'
 		exclude '**/index.jsp'
-		compileType = 'webapp'
 	}
 }
 
