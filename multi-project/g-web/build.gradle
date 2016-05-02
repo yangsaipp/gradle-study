@@ -9,25 +9,28 @@ dependencies {
 }
 
 hotFix {
-	output = 'build/hotFix/'+ new Date().format('yyyy-MM-dd_HHmm')
+	targetDir = "build/hotFix/${project.name}_hotfix_"+ new Date().format('yyyy-MM-dd_HHmm')
 	svn {
 		url = 'svnUrl'
 		username = 'yangsai'
 		password = 'test'
 	}
 	java { 
-		source = 'build/classes/main'
-		exclude '**/test3.java'
-		exclude '**/test2.java,**/test3.java' 
+		source = 'src/main/java'
+//		exclude '**/test3.java'
+		compileType = 'java'
+		//exclude '**/test2.java,**/test3.java'
 	}
 	resource {
-		source = 'build/resources/main'
-		exclude '**/gradleCopy.xml'
+		source = 'src/main/resources'
+//		exclude '**/gradleCopy.xml'
 		exclude '**/greeting.txt'
+		compileType = 'resource'
 	}
 	webapp {
 		source = 'src/main/webapp'
 		exclude '**/index.jsp'
+		compileType = 'webapp'
 	}
 }
 
@@ -140,6 +143,10 @@ task sysout << {
 	//println projectDir	//op:E:\Workspaces\workspace_java\gradle-study\cap\cap-web
     //println webAppDir		//op:E:\Workspaces\workspace_java\gradle-study\cap\cap-web\src\main\webapp
     //println webAppDirName	//op:src/main/webapp
+}
+
+task hotFixsysout << {
+	println hotFix.dumps()
 }
 
 //过滤项目并输出对应的源目录

@@ -1,8 +1,8 @@
 cap\cap-web\.gitignore
-cap\cap-web\build.gradle
 cap\cap-web\src\main\java\org\gradle\sample\Greeter.java
 cap\cap-web\src\main\java\org\gradle\GradleCopy.java
 cap\cap-web\src\main\resources\greeting.txt
 cap\cap-web\src\main\resources\gradleCopy.xml
 cap\cap-web\src\main\webapp\WEB-INF\web.xml
 cap\cap-web\src\main\webapp\index.jsp
+cap\cap-web\build.gradle

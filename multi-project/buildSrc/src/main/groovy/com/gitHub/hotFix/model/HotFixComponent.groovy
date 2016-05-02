@@ -6,11 +6,23 @@ package com.gitHub.hotFix.model
  *
  */
 class HotFixComponent {
+	
+	String name
+	
 	/**
 	 * hotFix来源目录
 	 */
 	String source
 	
+	/**
+	 * 编译输出目录
+	 */
+	String compileSource
+	
+	/**
+	 * 类型
+	 */
+	String compileType
 	/**
 	 * 排除文件
 	 */
@@ -26,11 +38,6 @@ class HotFixComponent {
 	 */
 	String output
 	
-	@Override
-	String toString() {
-		return "source：${source};exclude：${excludes};include：${includes};output：${output}"
-	}
-	
 	void exclude(String exclude) {
 		if(exclude.indexOf(',')) {
 			exclude.split(',').each {
@@ -41,5 +48,38 @@ class HotFixComponent {
 		}else{
 			this.excludes << exclude.trim()
 		}
+	}
+	
+	void include(String include) {
+		if(include.indexOf(',')) {
+			include.split(',').each {
+				if(it) {
+					this.includes << it.trim()
+				}
+			}
+		}else{
+			this.includes << include.trim()
+		}
+	}
+	
+	/**
+	 * hotfix文件集合
+	 */
+	Set<String> hotFixFileSet
+	
+	boolean addHotFixFile(String file) {
+		if(!hotFixFileSet) {
+			hotFixFileSet = []
+		}
+		hotFixFileSet << file
+	}
+	
+	@Override
+	String toString() {
+		return "[name:${name},source：${source},output：${output},compileSource:${compileSource},compileType:${compileType},\n excludes：${excludes};includes：${includes}]"
+	}
+	
+	String dump() {
+		return toString() + "\n[name:${name},hotFixFileSet:${hotFixFileSet}]"
 	}
 }

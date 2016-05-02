@@ -1,11 +1,13 @@
 package com.gitHub.hotFix
 
-import com.gitHub.hotFix.model.HotFixModel
-
-import org.gradle.api.Plugin	
+import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.plugins.ide.internal.IdePlugin;
+import org.gradle.api.logging.LogLevel
+
+import com.gitHub.hotFix.model.HotFixComponent;
+import com.gitHub.hotFix.model.HotFixModel
+import com.gitHub.hotFix.task.*
 
 /**
  * 增量插件
@@ -13,125 +15,58 @@ import org.gradle.plugins.ide.internal.IdePlugin;
  *
  */
 class HotFixPlugin implements Plugin<Project> {
-	static final String HOTFIX_FILE_GROUP = "hotFix"
-	static final String READ_HOTFIX_FILE = "readHotFixFile"
-//	static final String ECLIPSE_PROJECT_TASK_NAME = "eclipseProject"
-//	static final String ECLIPSE_CP_TASK_NAME = "eclipseClasspath"
-//	static final String ECLIPSE_JDT_TASK_NAME = "eclipseJdt"
+	static final String TASK_GROUP = "hotFix"
+	
+	static final String TASK_PARSE = "hotFixParse"
+	static final String TASK_PROCESS = "hotFixProcess"
+	static final String TASK_GENERATE = "HotFixGenerate"
 	
 	@Override
 	public void apply(Project project) {
 		HotFixModel model = project.extensions.create("hotFix", HotFixModel)
-		Task readHotFix = configureReadHotFixFile(project, model)
-		configureCopyClassHotFix(project, model).dependsOn(readHotFix, 'jar')
-		configureCopyWebappHotFix(project, model).dependsOn(readHotFix)
+		configureParseTask(project, model)
+		configureProcessTask(project, model)
+		configureGenerateTask(project, model)
 		
 		project.task('hotFixDump') << {
 			println model.dumps()
 		}
-		Task task = project.task('createHotFix') << {
-			println model.dumps()
-		}
-		task.dependsOn('copyClassHotFix','copyWebappHotFix')
-		task.setGroup(HOTFIX_FILE_GROUP)
-		readHotFix.setGroup(HOTFIX_FILE_GROUP)
 	}
 	
-	private Task configureCopyClassHotFix(Project project, HotFixModel model) {
-		if (project.tasks.findByName('copyClassHotFix')) {
-			return null
-		}
-		return project.task('copyClassHotFix') << {
-			println "classFile:$ext.hotFixFiles"
-			//hasProperty
-			if(!ext.hotFixFiles.empty) {
-				project.copy {
-					//class 目录
-					from model.java.source, {
-						exclude model.java.excludes
-					}
-					//resource 目录
-					from model.resource.source, {
-						exclude model.resource.excludes
-					}
-					into "${model.output}/WEB-INF/classes"
-					include ext.hotFixFiles
-				}
-			}
+	private Task configureGenerateTask(Project project, HotFixModel model) {
+		maybeAddTask(project, TASK_GENERATE, HotFixGenerator) {
+			description = 'generate hotfix.'
+			hotFixModel = model
+			dependsOn TASK_PROCESS
 		}
 	}
 	
-	private Task configureCopyWebappHotFix(Project project, HotFixModel model) {
-		if (project.tasks.findByName('copyWebappHotFix')) {
-			return null
-		}
-		return project.task('copyWebappHotFix') << {
-			println "webFile:$ext.hotFixFiles"
-			if(!ext.hotFixFiles.empty) {
-				project.copy {
-					//webApp目录
-					from model.webapp.source, {
-						exclude '**/classes'
-						//exclude '**/lib'
-						exclude model.webapp.excludes
-					}
-					into model.output
-					include ext.hotFixFiles
-				}
-			}
+	private Task configureProcessTask(Project project, HotFixModel model) {
+		maybeAddTask(project, TASK_PROCESS, HotFixProcessor) {
+			//task property
+			description = 'process hotfix file list.'
+			hotFixModel = model
+			dependsOn TASK_PARSE
 		}
 	}
 	
-	private Task configureReadHotFixFile(Project project, HotFixModel model) {
-		if (project.tasks.findByName(READ_HOTFIX_FILE)) {
-			return null
-		}
-		return project.task(READ_HOTFIX_FILE) << {
-			description = "读取hotFix文件列表"
-			File readme = new File("${project.projectDir}/hotFix.txt")
-			def webHotFixFiles = []
-			def classHotFixFiles = []
-			readme.eachLine("UTF-8"){
-				it = it.replaceAll("\\\\", '/');
-				def javaFlag = '/src/main/java/'
-				def resourceFlag = '/src/main/resources/'
-				def webAppFlag = '/src/main/webapp/'
-				def index = it.indexOf(javaFlag)
-				if(index != -1) {
-					it = it.replaceAll('java$', 'class')
-					classHotFixFiles << it.substring(index+javaFlag.length(), it.length())
-					//注意不能使用continue
-					return false
-				}
-				index = it.indexOf(resourceFlag)
-				if(index != -1) {
-					classHotFixFiles << it.substring(index+resourceFlag.length(), it.length())
-					return false
-				}
-				index = it.indexOf(webAppFlag)
-				if(index != -1) {
-					webHotFixFiles << it.substring(index + webAppFlag.length(), it.length())
-					return false
-				}
-				println "$index:$it"
-			}
-			project.tasks.findByName('copyWebappHotFix').configure { obj->
-				obj.ext.hotFixFiles = webHotFixFiles
-			}
-			
-			project.tasks.findByName('copyClassHotFix').configure { obj->
-				obj.ext.hotFixFiles = classHotFixFiles
-			}
-			//先清理
-			project.delete(model.output)
+	
+	private Task configureParseTask(Project project, HotFixModel model) {
+//		println model.targetDir 输出:null 这时候还未读取信息构建hotFix对象,只有在action里面才能获取到具体的hotFix对象
+		maybeAddTask(project, TASK_PARSE, HotFixParser) {
+			description = 'parse and get hotFix file list.'
+			hotFixModel = model
 		}
 	}
 	
-	private void maybeAddTask(Project project, String taskName, Class taskType, Closure action) {
+	private Task maybeAddTask(Project project, String taskName, Class taskType, Closure action) {
 		if (project.tasks.findByName(taskName)) { 
 			return
 		}
 		def task = project.tasks.create(taskName, taskType)
+		task.setGroup(TASK_GROUP)
 		project.configure(task, action)
+		return task
 	}
+	
 }
