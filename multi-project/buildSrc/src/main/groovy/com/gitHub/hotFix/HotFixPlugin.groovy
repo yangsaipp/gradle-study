@@ -47,6 +47,9 @@ class HotFixPlugin implements Plugin<Project> {
 			description = 'process hotfix file list.'
 			hotFixModel = model
 			dependsOn TASK_PARSE
+			if(project.plugins.hasPlugin(org.gradle.api.plugins.JavaPlugin.class)) {
+				dependsOn 'jar'
+			}
 		}
 	}
 	

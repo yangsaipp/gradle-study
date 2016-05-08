@@ -37,7 +37,7 @@ class HotFixProcessor extends DefaultTask {
 							fileSet << classFileName
 						}
 						component.hotFixFileSet = fileSet
-						//FIXME 依赖task jar
+//						FIXME 依赖task jar
 					}
 				],
 			resource:[processType:'resource',
