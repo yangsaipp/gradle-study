@@ -19,7 +19,7 @@ import org.gradle.plugins.ide.eclipse.model.EclipseWtp;
  * }
  * </pre>
  */
-class ProjectRepository {
+class ProjectSCM {
 	/**
 	 * 仓库访问地址
 	 * <p>

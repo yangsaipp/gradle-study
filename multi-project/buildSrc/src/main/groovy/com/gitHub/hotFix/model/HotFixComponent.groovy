@@ -65,7 +65,7 @@ class HotFixComponent {
 	/**
 	 * hotfix文件集合
 	 */
-	Set<String> hotFixFileSet
+	Set<String> hotFixFileSet = []
 	
 	boolean addHotFixFile(String file) {
 		if(!hotFixFileSet) {

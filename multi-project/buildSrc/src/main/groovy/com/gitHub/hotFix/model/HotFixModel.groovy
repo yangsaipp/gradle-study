@@ -13,8 +13,8 @@ class HotFixModel {
 	 */
 	String targetDir
 
-	ProjectRepository git
-	ProjectRepository svn
+	ProjectSCM git
+	ProjectSCM svn
 
 	HotFixComponent java
 	HotFixComponent resource
@@ -23,14 +23,14 @@ class HotFixModel {
 	
 	void git(Closure closure) {
 		if(!git) {
-			git = new ProjectRepository()
+			git = new ProjectSCM()
 		}
         ConfigureUtil.configure(closure, git)
     }
 	
 	void svn(Closure closure) {
 		if(!svn) {
-			svn = new ProjectRepository()
+			svn = new ProjectSCM()
 		}
 		ConfigureUtil.configure(closure, svn)
 	}

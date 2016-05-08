@@ -11,9 +11,9 @@ dependencies {
 hotFix {
 	targetDir = "build/hotFix/${project.name}_hotfix_"+ new Date().format('yyyy-MM-dd_HHmm')
 	svn {
-		url = 'svnUrl'
-		username = 'yangsai'
-		password = 'test'
+		url = 'http://www.svnchina.com/svn/sprite/'
+		username = 'testyss'
+		password = 'testyss'
 	}
 	java { 
 		source = 'src/main/java'

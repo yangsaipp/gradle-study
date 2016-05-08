@@ -5,8 +5,11 @@ import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.tasks.TaskAction
 
-import com.gitHub.hotFix.model.HotFixComponent
-import com.gitHub.hotFix.model.HotFixModel
+import com.gitHub.hotFix.model.ProjectSCM
+import com.gitHub.hotFix.scm.SCMService
+import com.gitHub.hotFix.scm.git.GitServiceImpl
+import com.gitHub.hotFix.scm.model.SCMLog
+import com.gitHub.hotFix.scm.svn.SVNServiceImpl
 
 /**
  * hotFix解析器，生成hotFix文件列表，供processor和generator使用
@@ -36,10 +39,29 @@ class HotFixParser extends DefaultTask {
 		components.put(hotFixModel.webapp.name, hotFixModel.webapp)
 		hotFixModel.ext.components = components
 		
-		File localConfigureFile = new File("${project.projectDir}/hotFix.txt")
-		buildLogger.debug('read loacl config file:\n{}.', localConfigureFile.path)
+		SCMService scmService
+		ProjectSCM scmInfo
+		SCMLog scmlog
+		if(hotFixModel.svn) {
+			scmService = new SVNServiceImpl()
+			scmInfo = hotFixModel.svn
+			scmlog = scmService.getLog(scmInfo, '150', '-1')
+		}else if(hotFixModel.git) {
+			scmService = new GitServiceImpl()
+			scmInfo = hotFixModel.git
+			scmlog = scmService.getLog(scmInfo, '0', '-1')
+		}else {
+			File localConfigureFile = new File("${project.projectDir}/hotFix.txt")
+			buildLogger.debug('read loacl config file:\n{}.', localConfigureFile.path)
+			scmlog = new SCMLog()
+			localConfigureFile.eachLine('UTF-8'){
+				scmlog.addPath(it)
+			}
+		}
+		
+		buildLogger.quiet("log:{}",scmlog)
 		def ignoreFiles = []
-		localConfigureFile.eachLine('UTF-8'){
+		scmlog.pathSet.each { 
 			it = it.replaceAll("\\\\", '/');
 			boolean isIgnore = true
 			for (component in hotFixModel.components.values()) {
