@@ -1,7 +1,11 @@
 package com.gitHub.hotFix.scm.svn
 
+import java.util.Collection;
+import java.util.LinkedList;
+
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
+import org.tmatesoft.svn.core.ISVNLogEntryHandler;
 import org.tmatesoft.svn.core.SVNException
 import org.tmatesoft.svn.core.SVNLogEntry
 import org.tmatesoft.svn.core.SVNLogEntryPath
@@ -12,12 +16,15 @@ import org.tmatesoft.svn.core.internal.io.fs.FSRepositoryFactory
 import org.tmatesoft.svn.core.internal.io.svn.SVNRepositoryFactoryImpl
 import org.tmatesoft.svn.core.io.SVNRepository
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory
+import org.tmatesoft.svn.core.wc.SVNClientManager
+import org.tmatesoft.svn.core.wc.SVNInfo
+import org.tmatesoft.svn.core.wc.SVNRevision
+import org.tmatesoft.svn.core.wc.SVNWCClient
 import org.tmatesoft.svn.core.wc.SVNWCUtil
 
 import com.gitHub.hotFix.model.ProjectSCM
 import com.gitHub.hotFix.scm.SCMService
 import com.gitHub.hotFix.scm.model.SCMLog
-import com.sun.java.util.jar.pack.Instruction.Switch;
 
 /**
  * 提供svn服务，如查询log
@@ -32,14 +39,29 @@ class SVNServiceImpl implements SCMService {
 	
 	@Override
 	public SCMLog getLog(ProjectSCM scmInfo, String startRevision, String endRevision) {
-		SVNRepository repository = null;
 		String url = scmInfo.url
 		String name = scmInfo.username
 		String password = scmInfo.password
+		String workingPath = scmInfo.workingPath
 		long startR = startRevision as long
 		long endR = endRevision as long
+		
+		SVNRepository repository = null;
+		SVNURL svnUrl = null
 		try {
-			repository = SVNRepositoryFactory.create(SVNURL.parseURIEncoded(url));
+			if(o[workingPath]?.trim()) {
+				SVNWCClient client = SVNClientManager.newInstance().getWCClient();
+				SVNInfo svnInfo = null;
+				try {
+					svnInfo = client.doInfo(new File(workingPath), SVNRevision.WORKING);
+				} catch (SVNException e) {
+					buildLogger.error("error while fetching svn client info: " + e.getMessage());
+				}
+				svnUrl = svnInfo.getURL();
+			}else {
+				svnUrl = SVNURL.parseURIEncoded(url)
+			}
+			repository = SVNRepositoryFactory.create(svnUrl);
 		} catch (SVNException svne) {
 			buildLogger.error("error while creating an SVNRepository for the location '" + url + "': " + svne.getMessage());
 		}
@@ -50,19 +72,23 @@ class SVNServiceImpl implements SCMService {
 		/*
 		 * Gets the latest revision number of the repository
 		 */
-		try {
-			endRevision = repository.getLatestRevision();
-		} catch (SVNException svne) {
-			buildLogger.error("error while fetching the latest repository revision: " + svne.getMessage());
-		}
+//		try {
+//			endRevision = repository.getLatestRevision();
+//		} catch (SVNException svne) {
+//			buildLogger.error("error while fetching the latest repository revision: " + svne.getMessage());
+//		}
 
-		Collection logEntries = null;
+		final Collection logEntries = null;
 		try {
 			String[] targetPath = [''] 
-			logEntries = repository.log(targetPath, null, startR, endR, true, true);
+			repository.log(targetPath, startR, endR, true, true, 0, null, true, new ISVNLogEntryHandler() {
+	            public void handleLogEntry(SVNLogEntry logEntry) {
+	                logEntries.add(logEntry);
+	            }        
+	        });
 
 		} catch (SVNException svne) {
-			buildLogger.error("error while collecting log information for '" + url + "': " + svne.getMessage());
+			buildLogger.error("error while collecting log information for '" + svnUrl.getPath() + "': " + svne.getMessage());
 		}
 		
 		SCMLog scmLog = new SCMLog()

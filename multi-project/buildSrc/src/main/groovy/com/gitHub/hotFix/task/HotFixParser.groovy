@@ -45,11 +45,12 @@ class HotFixParser extends DefaultTask {
 		if(hotFixModel.svn) {
 			scmService = new SVNServiceImpl()
 			scmInfo = hotFixModel.svn
-			scmlog = scmService.getLog(scmInfo, '150', '-1')
+			scmInfo.workingPath = project.projectDir
+			scmlog = scmService.getLog(scmInfo, '150', null)
 		}else if(hotFixModel.git) {
 			scmService = new GitServiceImpl()
 			scmInfo = hotFixModel.git
-			scmlog = scmService.getLog(scmInfo, '0', '-1')
+			scmlog = scmService.getLog(scmInfo, '0', null)
 		}else {
 			File localConfigureFile = new File("${project.projectDir}/hotFix.txt")
 			buildLogger.debug('read loacl config file:\n{}.', localConfigureFile.path)

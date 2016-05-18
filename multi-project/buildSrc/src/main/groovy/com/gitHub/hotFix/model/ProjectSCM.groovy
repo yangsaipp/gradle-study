@@ -41,8 +41,16 @@ class ProjectSCM {
 	 */
 	String password
 	
+	/**
+	 * SCM工作目录
+	 * <p>
+	 * See {@link ProjectRepository} for an example.
+	 */
+	String workingPath
+	
 	@Override
 	String toString() {
 		return "url：${this.url};username：${this.username};password：${this.password}"
 	}
+	
 }

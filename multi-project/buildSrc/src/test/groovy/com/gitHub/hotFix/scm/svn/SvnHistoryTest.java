@@ -16,7 +16,7 @@ import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
 import org.tmatesoft.svn.core.wc.SVNWCUtil;
 
-public class SvnHistory {
+public class SvnHistoryTest {
     /*
      * args parameter is used to obtain a repository location URL, a start
      * revision number, an end revision number, user's account name & password
